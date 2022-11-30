@@ -48,8 +48,8 @@
 <body>
     <main>
         <!-- navigation -->
-        <nav class="navbar navbar-expand-lg px-3">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg px-3 border border-start-0 border-light">
+            <div class="container">
                 <a class="navbar-brand" href="../index.html"><img
                         src="https://lh3.googleusercontent.com/Dip-9IoATCpV77-ypDRkF0ro7bMA0GQ1ahI_iJN5aacUslAYlKM8E4W4TRyqrQKKMk197f6XosEFEH0kjugf6h-qic7lzYIhsy0e8b75SPJzY7TYCHjOYI-mPgoF8SswcwAqOKJQYg=w2400"
                         alt="img" height="100"></a>
@@ -61,17 +61,19 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 text-uppercase">
                     </ul>
-                    <div class="cart-btn">
-                        <i id="cart" class="fas fa-shopping-cart"></i>
-                        <span class="cart-quantity">0</span>
-                    </div>
-                    <a title="logout" href="javascript:void(0)" class="logout">
-                        <i class="fa-solid fa-right-from-bracket fa-2xl"></i></a>
+                    <button type="button" class="cart-btn btn btn-link position-relative text-dark">
+                        <i class="fa-solid fa-cart-shopping fa-xl"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            99+
+                        </span>
+                    </button>
+                    <button type="button" title="logout" href="javascript:void(0)" class="btn btn-link logout m-2">
+                        <i class="fa-solid fa-right-from-bracket fa-2xl"></i></button>
                 </div>
             </div>
         </nav>
         <!-- contacts bar -->
-        <div class="container-fluid px-4 p-2 border border-light d-flex justify-content-between align-items-center">
+        <div class="container px-4 py-3 border border-light d-flex justify-content-between align-items-center">
             <div class="left-wrapper d-flex gap-3">
                 <!-- facebook -->
                 <a title="facebook" href="#" class="fb"><i class="fa-brands fa-square-facebook fa-xl"></i></a>
