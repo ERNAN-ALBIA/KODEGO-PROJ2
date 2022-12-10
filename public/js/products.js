@@ -7,72 +7,27 @@ let nav = [
 NavBarInitiator.appendLI(nav)
 // add ACTIVE class to current page
 document.getElementById('products').classList.add('active')
-
 // products container
-const CONTAINER = document.querySelector('.col-10>h1+.row')
+const CONTAINER = document.querySelector('.container>h1+.row')
 class Products {
-    constructor() {
-        this.products = []
+    // nav for generating categories
+    appendTabs = (data, i) => {
+        let li = document.createElement('li')
+        li.classList.add('nav-item')
+        let a = document.createElement('a')
+        a.classList.add('nav-link')
+        a.href = 'javascript:void(0)'
+        a.onclick = this.fetchItems
+        a.innerText = data.name.toUpperCase()
+        li.appendChild(a)
+        return li
     }
-    appendAccordion = (data, i) => {
-        let accordItem = document.createElement('div')
-        let h2 = document.createElement('h2')
-        h2.classList.add('accordion-header')
-        h2.id = `flush-heading${this.number(i + 1)}`
-        accordItem.classList.add('accordion-item')
-        let button = document.createElement('button')
-        // append classes to accordion button
-        button.classList.add('accordion-button')
-        button.classList.add('collapsed')
-        button.type = 'button'
-        // append attributes to accordion button
-        button.setAttribute('data-bs-toggle', 'collapse')
-        button.setAttribute('aria-expanded', 'false')
-        button.setAttribute('aria-controls', `flush-collapse${this.number(i + 1)}`)
-        button.setAttribute('data-bs-target', `#flush-collapse${this.number(i + 1)}`)
-        // create accordion body wrapper
-        let acc = document.createElement('div')
-        acc.id = `flush-collapse${this.number(i + 1)}`
-        // add classes to accordion div inside accordion
-        acc.classList.add('accordion-collapse')
-        acc.classList.add('collapse')
-        acc.setAttribute('aria-labelledby', `flush-headinge${this.number(i + 1)}`)
-        acc.setAttribute('data-bs-parent', '#accord-categories')
-        let accBody = document.createElement('div')
-        let ul = document.createElement('ul')
-        ul.classList.add('list-unstyled')
-
-        if (data.brands.length > 0) {
-            for (let b = 0; b < data.brands.length; b++) {
-                let li = document.createElement('li')
-                let a = document.createElement('a')
-                a.href = "javascript:void(0)"
-                a.id = data.brands[b]
-                a.onclick = this.loadProduct
-                a.appendChild(document.createTextNode(data.brands[b].toUpperCase()))
-                li.appendChild(a)
-                ul.appendChild(li)
-            }
-            accBody.appendChild(ul)
-        }
-        else
-            accBody.appendChild(document.createTextNode('test'))
-
-        accBody.classList.add('accordion-body')
-        // append body to accordion
-        acc.appendChild(accBody)
-        // button text
-        button.appendChild(document.createTextNode(data.name.toUpperCase()))
-        // append button to h2
-        h2.appendChild(button)
-
-        accordItem.appendChild(h2)
-        accordItem.appendChild(acc)
-        return accordItem
+    fetchItems = (e) => {
+        this.cls()
+        document.querySelector('.page-loading-status').style.display = 'block'
+        this.fetchSwitch(e.target.innerText.toLowerCase())
     }
-    number = (n) => {
-        return numberToEnglish(n).charAt(0).toUpperCase() + numberToEnglish(n).slice(1).trim()
-    }
+    // load products per category - upon clicking the nav body
     loadProduct = (e) => {
         let category = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.innerText.toLowerCase()
         // get H1 element to apped the category name
@@ -82,13 +37,12 @@ class Products {
         label.innerText = category
     }
     fetchSwitch = (category) => {
+        document.getElementById('ctgry').innerText = category.toUpperCase()
         // category.split(' ')[0].charAt(0) + category.split(' ')[1].charAt(0) --- this function gets the first letter of splitted string
-
-        // array of categories with more than one word
+        // filter categories and return array of categories with more than one word
         let categoriesWithMoreThanOneWord = categories.filter(e => e.name.split(' ').length > 1).map(a => a.name)
-        // array of categories with one word
+        // filter categories and return array of categories with one word
         let oneWordCategories = categories.filter(e => e.name.split(' ').length == 1).map(a => a.name)
-
         if (categoriesWithMoreThanOneWord.includes(category)) {
             this.fetchPerCategory(category.split(' ')[0].charAt(0) + category.split(' ')[1].charAt(0))
         } else if (oneWordCategories.includes(category)) {
@@ -97,42 +51,15 @@ class Products {
     }
     fetchPerCategory = async (obj) => {
         // get all products from firebase API
-        let response = await App.GET(`${obj}.json`)
-        Object.keys(response).forEach(e => {
-            CONTAINER.appendChild(ProductObj.generateCard(response[e].name, response[e].image_link[0], response[e]))
-        })
-        this.loadValue()
+            let response = await App.GET(`${obj}.json`)
+            Object.keys(response).forEach(e => {
+                CONTAINER.appendChild(this.generateCard(response[e]))
+            })
+        this.loadProduct()
     }
-    returnElements = async () => {
-        let condition1 = categories.filter(e => e.name.split(' ').length > 1).map(a => a.name)
-        let condition2 = categories.filter(e => e.name.split(' ').length == 1).map(a => a.name)
-        let response
-        let p = []
-        for (let c = 0; c < condition1.length; c++) {
-            response = await App.GET(`${condition1[c].split(' ')[0].charAt(0) + condition1[c].split(' ')[1].charAt(0)}.json`)
-            for (let e = 0; e < Object.keys(response).length; e++) {
-                p.push(ProductObj.generateCard(response[Object.keys(response)[e]].name, response[Object.keys(response)[e]].image_link[0], response[Object.keys(response)[e]]))
-
-            }
-
-        }
-        for (let d = 0; d < condition2.length; d++) {
-            response = await App.GET(`${condition2[d]}.json`)
-            for (let e = 0; e < Object.keys(response).length; e++) {
-                p.push(ProductObj.generateCard(response[Object.keys(response)[e]].name, response[Object.keys(response)[e]].image_link[0], response[Object.keys(response)[e]]))
-            }
-        }
-        return p
-    }
-    manipulateDOM(start, end) {
-        this.returnElements().then(response => {
-            for (let h = start; h < end; h++) {
-                CONTAINER.appendChild(response[h])
-            }
-            this.loadValue()
-        })
-    }
-    loadValue = () => {
+    loadProduct = () => {
+        // view product btn
+        document.querySelector('.page-loading-status').style.display = 'none'
         document.querySelectorAll('.btn.btn-primary').forEach(e => {
             e.addEventListener('click', () => {
                 CONTAINER.innerHTML = ''
@@ -140,28 +67,63 @@ class Products {
                 btn.appendChild(document.createTextNode('Back'))
                 btn.classList.add('btn')
                 btn.classList.add('btn-primary')
+                // back button
                 btn.addEventListener('click', this.return)
-                CONTAINER.appendChild(btn)
-                CONTAINER.appendChild(this.generateProduct(JSON.parse(e.getAttribute('data-value'))))
-                CONTAINER.appendChild(this.generateDiv(JSON.parse(e.getAttribute('data-value'))))
+                let addToCartBtn = document.createElement('button')
+                addToCartBtn.classList.add('btn')
+                addToCartBtn.classList.add('btn-outline-primary')
+                addToCartBtn.appendChild(document.createTextNode('Add to cart'))
+                addToCartBtn.addEventListener('click', (e) => Cart.ADD(e.target.parentElement.parentElement))
+                let btnGroup = document.createElement('div')
+                btnGroup.classList.add('btn-group')
+                btnGroup.setAttribute('role', 'group')
+                // append buttons to button group
+                btnGroup.appendChild(btn)
+                btnGroup.appendChild(addToCartBtn)
+                let row = this.generateRow()
+                // create div with column class
+                let col1 = this.generateColumn(4)
+                let col2 = this.generateColumn(8)
+                col1.appendChild(this.generateProduct(JSON.parse(e.getAttribute('data-value'))))
+                col2.appendChild(this.generateProductDetails(JSON.parse(e.getAttribute('data-value')).name))
+                col2.appendChild(this.generateIframe(JSON.parse(e.getAttribute('data-value')).specification))
+                col2.appendChild(btnGroup)
+                row.appendChild(col1)
+                row.appendChild(col2)
+                CONTAINER.appendChild(row)
             })
         })
     }
+    generateProductDetails = (data) => {
+        let h3 = document.createElement('h3')
+        h3.innerText = data
+        return h3
+    }
+    generateIframe = (data) => {
+        let iframe = document.createElement('iframe')
+        iframe.src = data
+        return iframe
+    }
     generateProduct = (data) => {
         let row = this.generateRow()
-        row.classList.add(`row-cols-${data.image_link.length}`)
         // append image based on length
-        for (let i = 0; i < data.image_link.length; i++) {
-            let img = document.createElement('img')
-            img.src = data.image_link[i]
-            img.loading = 'lazy'
-            img.classList.add('img')
-            img.classList.add('m-2')
-            let col = document.createElement('div')
-            col.classList.add('col')
-            col.appendChild(img)
-            row.appendChild(col)
-        }
+        let img = document.createElement('img')
+        img.src = data.image_link[0]
+        let count = 0
+        img.addEventListener('click', () => {
+            console.log(count)
+            console.log(data.image_link[count++])
+            if (count < data.image_link.length)
+                img.src = data.image_link[count]
+            else
+                count = 0
+        })
+        img.style.height = 'fit-content'
+        img.style.width = '400px'
+        img.classList.add('border')
+        img.classList.add('rounded')
+        // append image to row
+        row.appendChild(img)
         return row
     }
     generateRow = () => {
@@ -169,45 +131,54 @@ class Products {
         row.classList.add('row')
         return row
     }
-    generateDiv = (data) => {
-        let row = this.generateRow()
-        row.classList.add('row-cols-2')
+    generateColumn = (size) => {
         let col = document.createElement('div')
-        col.classList.add('col')
-        let img = document.createElement('img')
-        img.src = data.image_link[data.image_link.length - data.image_link.length]
-        col.appendChild(img)
-        let col2 = document.createElement('div')
-        col2.classList.add('col')
-        row.appendChild(col)
-        row.appendChild(col2)
-        return row
+        col.classList.add(`col-${size}`)
+        return col
+    }
+
+    generateCard = (data) => {
+        console.log(data)
+        let column = document.createElement('div')
+        let columnClasses = ['col', 'm-2']
+        for (let a = 0; a < columnClasses.length; a++) {
+            column.classList.add(columnClasses[a])
+        }
+        let div = document.createElement('div')
+        div.classList.add('card')
+        div.classList.add('border')
+        div.classList.add('h-100')
+        let image = document.createElement('img')
+        image.classList.add('card-img-top')
+        image.classList.add('img')
+        image.src = data.image_link[0]
+        let body = document.createElement('div')
+        body.classList.add('card-body')
+        let h5 = document.createElement('h5')
+        h5.classList.add('card-title')
+        h5.innerText = data.name
+        let btn = document.createElement('button')
+        btn.appendChild(document.createTextNode('View'))
+        btn.setAttribute('data-value', `${JSON.stringify(data)}`)
+        let btnClasses = ['btn', 'btn-primary']
+        for (let b = 0; b < btnClasses.length; b++) {
+            btn.classList.add(btnClasses[b])
+        }
+        body.appendChild(h5)
+        body.appendChild(btn)
+        div.appendChild(image)
+        div.appendChild(body)
+        column.appendChild(div)
+        return column
     }
     return = (e) => {
-        let category = e.target.parentElement.parentElement.firstChild.nextSibling.innerText
+        let category = document.getElementById('ctgry').innerText.toLowerCase()
+        console.log(category)
         this.cls()
-        if (category == 'All Products') {
-            let start = 0
-            let end = 10
-            this.manipulateDOM(start, end)
-        }
         this.fetchSwitch(category)
     }
     cls = () => {
         CONTAINER.innerHTML = ''
-    }
-    generateButton = () => {
-        let btn = document.createElement('button')
-        btn.appendChild(document.createTextNode('Next'))
-        btn.setAttribute('data-start', 10)
-        btn.setAttribute('data-end', 20)
-        btn.addEventListener('click', this.changePage)
-        return btn
-    }
-    changePage = (e) => {
-        console.log(e.target.getAttribute('data-start'))
-        this.cls()
-        prod.manipulateDOM(parseInt(e.target.getAttribute('data-start')), parseInt(e.target.getAttribute('data-end')))
     }
 }
 let prod = new Products()
@@ -225,14 +196,7 @@ let categories = [
     { name: 'storage device', brands: ['all'] }
 ]
 for (let i = 0; i < categories.length; i++) {
-    document.getElementById('accord-categories').appendChild(prod.appendAccordion(categories[i], i))
+    document.getElementById('categories').appendChild(prod.appendTabs(categories[i], i))
 }
-document.getElementById('ctgry').innerText = 'All Products'
-let start = 0
-let end = 10
-prod.manipulateDOM(start, end)
-function insertAfter(referenceNode, newNode) {
-    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-}
-
-insertAfter(CONTAINER, prod.generateButton())
+prod.fetchPerCategory('case')
+document.getElementById('ctgry').innerText = 'case'.toUpperCase()

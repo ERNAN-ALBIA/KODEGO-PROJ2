@@ -1,7 +1,7 @@
 
 // APi URL of Firebase Realtime Database
 const firebaseAPI = 'https://techmart-96763-default-rtdb.asia-southeast1.firebasedatabase.app/'
-
+let cartItems = [];
 // determine if login is saved in localstorage 
 let login = localStorage.getItem('login')
 if (login === 'true') {
@@ -47,21 +47,20 @@ let App = {
             console.log('** beforeSend request fetch **');
             return await fetch(url, {
                 method: 'POST',
-                mode: 'cors',
+                // mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
         }
-        const req = await requestFetch(`${apiURL}${url}`)
+        const req = await requestFetch(`${firebaseAPI}${url}`)
         const json = await req.json()
         return json
     },
     // GET all data in API
     GET: async (url = '') => {
         let requestFetch = async (url) => {
-            console.log('** beforeSend request fetch **');
             return await fetch(url, {
                 method: 'GET',
                 mode: 'cors',
@@ -88,63 +87,20 @@ let NavBarInitiator = {
             a.href = `${nav[i].Location}`
             a.classList.add('nav-link')
             a.id = nav[i].Title.toLowerCase()
-            li.appendChild(a)
-            ul.appendChild(li)
+            li.appendChild(a)       
+            ul.appendChild(li)  
         }
     }
 }
 
-let ProductObj = {
-    // generate card for products page
-    generateCard: (text, image_link, data) => {
-        let column = document.createElement('div')
-        let columnClasses = ['col', 'm-2']
-        for (let a = 0; a < columnClasses.length; a++) {
-            column.classList.add(columnClasses[a])
-        }
-        let div = document.createElement('div')
-        div.classList.add('card')
-        let image = document.createElement('img')
-        image.classList.add('card-img-top')
-        image.classList.add('img-fluid')
-        image.src = image_link
-        let body = document.createElement('div')
-        body.classList.add('card-body')
-        let h5 = document.createElement('h5')
-        h5.classList.add('card-title')
-        h5.innerText = text
-        let btn = document.createElement('button')
-        btn.appendChild(document.createTextNode('View'))
-        btn.setAttribute('data-value', `${JSON.stringify(data)}`)
-        let btnClasses = ['btn', 'btn-primary']
-        for (let b = 0; b < btnClasses.length; b++) {
-            btn.classList.add(btnClasses[b])
-        }
-        body.appendChild(h5)
-        body.appendChild(btn)
-        div.appendChild(image)
-        div.appendChild(body)
-        column.appendChild(div)
-        return column
+let Cart = {
+    initiator: () => {
+        return cartItems = JSON.parse(sessionStorage.getItem('cart')).items || [];
+    },
+    ADD: (value) => {
+        console.log(value)
+    },
+    loadCart: () => {
+
     }
-}
-
-// convert number to english word - this is needed for accordions in products page
-function numberToEnglish(n) {
-    let oneToTwenty = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ',
-        'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
-    let tenth = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-
-    if (n.toString().length > 7) return myDiv.innerHTML = 'overlimit';
-    //let num = ('0000000000'+ numberInput).slice(-10).match(/^(\d{1})(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-    let num = ('0000000' + n).slice(-7).match(/^(\d{1})(\d{1})(\d{2})(\d{1})(\d{2})$/);
-    if (!num) return;
-
-    let outputText = num[1] != 0 ? (oneToTwenty[Number(num[1])] || `${tenth[num[1][0]]} ${oneToTwenty[num[1][1]]}`) + ' million ' : '';
-    outputText += num[2] != 0 ? (oneToTwenty[Number(num[2])] || `${tenth[num[2][0]]} ${oneToTwenty[num[2][1]]}`) + 'hundred ' : '';
-    outputText += num[3] != 0 ? (oneToTwenty[Number(num[3])] || `${tenth[num[3][0]]} ${oneToTwenty[num[3][1]]}`) + ' thousand ' : '';
-    outputText += num[4] != 0 ? (oneToTwenty[Number(num[4])] || `${tenth[num[4][0]]} ${oneToTwenty[num[4][1]]}`) + 'hundred ' : '';
-    outputText += num[5] != 0 ? (oneToTwenty[Number(num[5])] || `${tenth[num[5][0]]} ${oneToTwenty[num[5][1]]} `) : '';
-
-    return outputText
 }
